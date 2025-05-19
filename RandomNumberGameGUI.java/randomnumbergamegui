@@ -1,0 +1,78 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.Random;
+
+public class RandomNumberGameGUI extends JFrame {
+    private int numberToGuess;
+    private int attempts = 0;
+    private int timeLeft = 60;
+
+    private JTextField guessField;
+    private JLabel messageLabel, timerLabel;
+    private Timer timer;
+
+    public RandomNumberGameGUI() {
+        setTitle("🎯 Random Number Guessing Game");
+        setSize(400, 300);
+        setLayout(new GridLayout(5, 1));
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        numberToGuess = new Random().nextInt(100) + 1;
+
+        JLabel instructions = new JLabel("Guess a number between 1 and 100:", SwingConstants.CENTER);
+        add(instructions);
+
+        guessField = new JTextField();
+        add(guessField);
+
+        JButton guessButton = new JButton("Submit Guess");
+        add(guessButton);
+
+        messageLabel = new JLabel("You have 60 seconds. Start guessing!", SwingConstants.CENTER);
+        add(messageLabel);
+
+        timerLabel = new JLabel("Time left: 60 seconds", SwingConstants.CENTER);
+        add(timerLabel);
+
+        guessButton.addActionListener(e -> handleGuess());
+
+        // Timer updates every second
+        timer = new Timer(1000, e -> {
+            timeLeft--;
+            timerLabel.setText("Time left: " + timeLeft + " seconds");
+
+            if (timeLeft <= 0) {
+                timer.stop();
+                guessField.setEditable(false);
+                messageLabel.setText("⏰ Time's up! The number was: " + numberToGuess);
+            }
+        });
+
+        timer.start();
+        setVisible(true);
+    }
+
+    private void handleGuess() {
+        try {
+            int guess = Integer.parseInt(guessField.getText());
+            attempts++;
+
+            if (guess < numberToGuess) {
+                messageLabel.setText("Too low! Try again.");
+            } else if (guess > numberToGuess) {
+                messageLabel.setText("Too high! Try again.");
+            } else {
+                timer.stop();
+                messageLabel.setText("🎉 Correct! You guessed it in " + attempts + " attempts.");
+                guessField.setEditable(false);
+            }
+        } catch (NumberFormatException ex) {
+            messageLabel.setText("⚠️ Please enter a valid number.");
+        }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(RandomNumberGameGUI::new);
+    }
+}
